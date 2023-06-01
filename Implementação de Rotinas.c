@@ -48,10 +48,98 @@ void GaussJordan() {
     // Implemente o Método de Gauss-Jordan aqui
 }
 
-void DecomposicaoLU() {
-    printf("Opção selecionada: Método da Decomposição LU\n");
-    // Implemente o Método da Decomposição LU aqui
+void DecomposicaoLU(int ordem, double coeficientes[][], double termos[], double *sol[]){
+	//verificar convergencia
+	int det, r;
+	int i=1;
+	int L=1, U=1;
+	int p,q, Uij[ordem][ordem]; Lij[ordem][ordem], soma;
+	int t=1, y[ordem], x[ordem];
+	do{
+	if(i==1)
+		det=coeficientes[1][1];
+
+	if(i==2){
+	det=(coeficientes[1][1]*coeficientes[2][2]-coeficientes[1][2]*coeficientes[2][1]);
 }
+	if(i!= 1 && i!= 2){
+		det();
+	}
+	
+	if(det==0){
+		printf("não converge");
+		return 0;
+	}
+	i++;
+	
+	}while(i<=ordem && det !=0);
+	
+	//determinar L e U
+	
+	while(U != ordem || U == ordem){
+		do{
+		printf("%d linha de U", &U);
+		for(p=U; p<=ordem; p++){
+			for(q=1; q<=U-1; q++){
+				soma= L[U][q] * U[q][p];
+			}
+			Uij[U][p]= coeficientes[U][p] - soma;
+		}
+		U++;
+	}while (p<=ordem);
+	
+		do{
+		printf("%d coluna de L", &L);
+		for(p=L+1; p<=ordem; p++){
+			for(q=1; q<=L-1; q++){
+				soma= L[p][q] * U[q][L];
+			}
+			Lij[p][L]= (coeficientes[p][L] - soma)/ Uij[L][L];
+		}
+		L++;
+	}while (p<=ordem);
+};
+
+//resolver sistema triangular
+
+do{//Ly=b
+	if(t=1){
+		y[t]= termos[t]/1;
+	}
+	else{
+		for(q=1; q<=t-1; q++){
+			if(t>q){
+				soma=Lij[t][q]*y[q];
+			}
+		}
+		y[t]=(termos[t]-soma)/1;
+	}
+	t++;
+}while(t != ordem || t == ordem);
+
+t=1;
+do{//Ux=y
+	if(t=ordem){
+		x[t]= termos[t]/Uij[t][t];
+	}
+	else{
+		for(q=t+1; q<=ordem; q++){
+			if(t<=q){
+				soma=Uij[t][q]*x[q];
+			}
+
+		}
+		x[t]=(termos[t]-soma)/Uij[t][t];
+	}
+	t++;
+}while(t != ordem ||) t == ordem);
+
+for(r=1; r<=ordem; r++){
+	*sol[r]=x[r];
+}
+}
+
+
 
 void Jacobi() {
     printf("Opção selecionada: Método de Jacobi\n");
