@@ -2,30 +2,53 @@
 #include <stdlib.h> 
 
 // Implementação das rotinas <3 
-void LeituraSistema() {
-    printf("Opção selecionada: Leitura de sistema\n");
-    int n; 
-    printf("Digite o tamanho da matriz: ");
-    scanf("%d", &n);
+int calculaDeterminante(int ordem, double matriz[ordem][ordem]) {
+    int det = 0;
+	int sinal;
+	int r;
+    int i, j, k;
+    if (ordem == 2) {
+        det = (matriz[1][1] * matriz[2][2]) - (matriz[1][2] * matriz[2][1]);
+    }
+    else{
 
-    double matriz[n][n];
-    double vetor[n];
-
-    printf("Digite os elementos da matriz:\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("Digite o elemento M[%d][%d]: ", i, j);
-            scanf("%lf", &matriz[i][j]);
+    for (i = 1; i <= ordem; i++) {
+        if (i % 2 == 0) {
+            sinal = 1;
+        } else {
+            sinal = -1;
         }
-    }
 
-    printf("Digite os elementos do vetor:\n");
-    for (int i = 0; i < n; i++) {
-        printf("Digite o elemento V[%d]: ", i);
-        scanf("%lf", &vetor[i]);
-    }
+        double matriz_aux[ordem - 1][ordem - 1];
+        int aux_i = 1;
+        
+		int aux_j = 1;
+        // Criando a matriz auxiliar// colocar aux_j =0
+        for (j = 2; j <= ordem; j++) {
+            for ( k = 1; k <= ordem; k++) {
+                if (k != i) {
+                    matriz_aux[aux_i][aux_j] = matriz[j][k];
+                    aux_j++;
+                }
+            }
+            aux_i++;
+            int aux_j = 1;
+        }
+		r = calculaDeterminante(ordem - 1, matriz_aux);
+        det = det + (sinal * matriz[1][i] * r);
 
-    printf("O sistema foi lido com sucesso!\n");
+    }
+}
+
+    return det;
+}
+
+
+
+void exibeDeterminante(int ordem, double matriz[ordem][ordem]) {
+
+    int determinante = calculaDeterminante(ordem, matriz);
+    printf("Determinante: %d\n", determinante);
 }
 
 void EscritaSistema() {
@@ -48,26 +71,40 @@ void GaussJordan() {
     // Implemente o Método de Gauss-Jordan aqui
 }
 
-void DecomposicaoLU(int ordem, double coeficientes[][], double termos[], double *sol[]){
+int DecomposicaoLU(int ordem, double coeficientes[ordem][ordem]){
+	double *sol[ordem];
+	int j;
+	double termos[ordem];
+	printf("digite os termos:\n");
+	for(j=1; j<=ordem; j++){
+		printf("[%d]:",j);
+		scanf("%lf", &termos[j]);
+		printf("\n");
+	}
+	
 	//verificar convergencia
 	int det, r;
 	int i=1;
 	int L=1, U=1;
-	int p,q, Uij[ordem][ordem]; Lij[ordem][ordem], soma;
+	int p,q,soma;
+	double Uij[ordem][ordem], Lij[ordem][ordem];
 	int t=1, y[ordem], x[ordem];
 	do{
-	if(i==1)
+	if(i==1){
 		det=coeficientes[1][1];
-
+		printf("det A1 = %d\n", det);
+	}
 	if(i==2){
 	det=(coeficientes[1][1]*coeficientes[2][2]-coeficientes[1][2]*coeficientes[2][1]);
+	printf("det A2 = %d\n", det);
 }
 	if(i!= 1 && i!= 2){
-		det();
+		det = calculaDeterminante(ordem, coeficientes);
+		printf("det A%d = %d\n", i, det);
 	}
 	
 	if(det==0){
-		printf("não converge");
+		printf("nao converge");
 		return 0;
 	}
 	i++;
@@ -76,29 +113,32 @@ void DecomposicaoLU(int ordem, double coeficientes[][], double termos[], double 
 	
 	//determinar L e U
 	
-	while(U != ordem || U == ordem){
+	do{
 		do{
-		printf("%d linha de U", &U);
+		printf("%d linha de U", U);
 		for(p=U; p<=ordem; p++){
 			for(q=1; q<=U-1; q++){
-				soma= L[U][q] * U[q][p];
-			}
+				soma= soma + (Lij[U][q] * Uij[q][p]);
+			} 
 			Uij[U][p]= coeficientes[U][p] - soma;
+			soma=0;
 		}
 		U++;
-	}while (p<=ordem);
+	}while (U<=ordem);
 	
 		do{
 		printf("%d coluna de L", &L);
 		for(p=L+1; p<=ordem; p++){
 			for(q=1; q<=L-1; q++){
-				soma= L[p][q] * U[q][L];
+				soma= soma + Lij[p][q] * Uij[q][L];
 			}
+			
 			Lij[p][L]= (coeficientes[p][L] - soma)/ Uij[L][L];
+			soma=0;
 		}
 		L++;
-	}while (p<=ordem);
-};
+	}while (U<=ordem);
+}while(U != ordem || U == ordem);
 
 //resolver sistema triangular
 
@@ -109,10 +149,11 @@ do{//Ly=b
 	else{
 		for(q=1; q<=t-1; q++){
 			if(t>q){
-				soma=Lij[t][q]*y[q];
+				soma=soma + Lij[t][q]*y[q];
 			}
 		}
 		y[t]=(termos[t]-soma)/1;
+		soma=0;
 	}
 	t++;
 }while(t != ordem || t == ordem);
@@ -125,19 +166,21 @@ do{//Ux=y
 	else{
 		for(q=t+1; q<=ordem; q++){
 			if(t<=q){
-				soma=Uij[t][q]*x[q];
+				soma=soma + Uij[t][q]*x[q];
 			}
 
 		}
 		x[t]=(termos[t]-soma)/Uij[t][t];
+		soma=0;
 	}
 	t++;
-}while(t != ordem ||) t == ordem);
+}while(t != ordem || t == ordem);
 
 for(r=1; r<=ordem; r++){
 	*sol[r]=x[r];
 }
 }
+
 
 
 
@@ -163,7 +206,19 @@ void MatrizInversa() {
 
 int main() {
     int opcao;
+    int ordem;
+	int i, j;
+    printf("Digite a ordem da matriz: ");
+    scanf("%d", &ordem);
+    double matriz[ordem][ordem];
 
+    printf("Digite os elementos da matriz:\n");
+    for (i = 1; i <= ordem; i++) {
+        for (j = 1; j <= ordem; j++) {
+            printf("Digite o elemento [%d][%d]: ", i, j);
+            scanf("%lf", &matriz[i][j]);
+        }
+    }
     do {
 
         printf("MENU PRINCIPAL\n");
